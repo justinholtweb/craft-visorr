@@ -1,0 +1,253 @@
+{% import '_includes/forms.twig' as forms %}
+
+{% set policyRows = [] %}
+{% for policy in policies %}
+    {% set policyRows = policyRows|merge([{
+        elementType: policy.elementType,
+        sectionUid: policy.sectionUid,
+        siteUid: policy.siteUid,
+        maxRevisions: policy.maxRevisions,
+        maxAgeDays: policy.maxAgeDays,
+        minKeep: policy.minKeep,
+        enabled: policy.enabled,
+        note: policy.note,
+    }]) %}
+{% endfor %}
+
+{% set sectionOptions = [{ label: 'Any section'|t('visorr'), value: '' }] %}
+{% for section in sections %}
+    {% set sectionOptions = sectionOptions|merge([{ label: section.name, value: section.uid }]) %}
+{% endfor %}
+
+{% set siteOptions = [{ label: 'Any site'|t('visorr'), value: '' }] %}
+{% for site in sites %}
+    {% set siteOptions = siteOptions|merge([{ label: site.name, value: site.uid }]) %}
+{% endfor %}
+
+{% set typeOptions = [] %}
+{% for value, label in elementTypes %}
+    {% set typeOptions = typeOptions|merge([{ label: label, value: value }]) %}
+{% endfor %}
+
+<h2>{{ 'Retention'|t('visorr') }}</h2>
+
+<p class="light">
+    {{ 'Craft keeps {count} revisions per element, everywhere, from one global setting. A policy below overrides that for whatever it names — the most specific matching policy wins, so “ten everywhere, two hundred on the homepage” is two rules, not a compromise.'|t('visorr', {
+        count: craftMax ?: '∞',
+    }) }}
+</p>
+
+{% if not isPro %}
+    <div class="notice">
+        {{ 'Retention policies are a Visorr Pro feature. Without them, Craft’s own maxRevisions setting still applies exactly as it did before Visorr was installed.'|t('visorr') }}
+    </div>
+{% endif %}
+
+{{ forms.editableTableField({
+    label: 'Retention policies'|t('visorr'),
+    instructions: 'Leave both limits empty on a row to remove it.'|t('visorr'),
+    id: 'policies',
+    name: 'policies',
+    allowAdd: isPro,
+    allowDelete: true,
+    allowReorder: false,
+    static: not isPro,
+    cols: {
+        elementType: {
+            heading: 'Element type'|t('visorr'),
+            type: 'select',
+            options: typeOptions,
+        },
+        sectionUid: {
+            heading: 'Section'|t('visorr'),
+            type: 'select',
+            options: sectionOptions,
+            info: 'Entries only.'|t('visorr'),
+        },
+        siteUid: {
+            heading: 'Site'|t('visorr'),
+            type: 'select',
+            options: siteOptions,
+        },
+        maxRevisions: {
+            heading: 'Keep'|t('visorr'),
+            type: 'number',
+            width: 90,
+            placeholder: '∞',
+        },
+        maxAgeDays: {
+            heading: 'Expire after (days)'|t('visorr'),
+            type: 'number',
+            width: 130,
+            placeholder: '∞',
+        },
+        minKeep: {
+            heading: 'Never fewer than'|t('visorr'),
+            type: 'number',
+            width: 130,
+        },
+        enabled: {
+            heading: 'On'|t('visorr'),
+            type: 'lightswitch',
+        },
+        note: {
+            heading: 'Note'|t('visorr'),
+            type: 'singleline',
+        },
+    },
+    rows: policyRows,
+    errors: settings.getErrors('policies'),
+}) }}
+
+<hr>
+
+<h2>{{ 'Pins'|t('visorr') }}</h2>
+
+{{ forms.lightswitchField({
+    label: 'Protect pinned revisions'|t('visorr'),
+    instructions: 'A pinned revision is skipped by every prune — Visorr’s and Craft’s own. Craft prunes on every save, so with this off a pin is only a bookmark.'|t('visorr'),
+    id: 'protectPins',
+    name: 'settings[protectPins]',
+    on: settings.protectPins,
+}) }}
+
+<hr>
+
+<h2>{{ 'Comparison'|t('visorr') }}</h2>
+
+{{ forms.lightswitchField({
+    label: 'Show the revision panel'|t('visorr'),
+    instructions: 'Adds a Visorr panel to the sidebar of element edit screens.'|t('visorr'),
+    id: 'showRevisionPanel',
+    name: 'settings[showRevisionPanel]',
+    on: settings.showRevisionPanel,
+}) }}
+
+{{ forms.textField({
+    label: 'Revisions in the panel'|t('visorr'),
+    id: 'panelRevisionLimit',
+    name: 'settings[panelRevisionLimit]',
+    type: 'number',
+    size: 5,
+    value: settings.panelRevisionLimit,
+    errors: settings.getErrors('panelRevisionLimit'),
+}) }}
+
+{{ forms.lightswitchField({
+    label: 'Show unchanged fields'|t('visorr'),
+    instructions: 'Off, a comparison shows only what moved.'|t('visorr'),
+    id: 'showUnchangedFields',
+    name: 'settings[showUnchangedFields]',
+    on: settings.showUnchangedFields,
+}) }}
+
+{{ forms.textField({
+    label: 'Word-diff size limit'|t('visorr'),
+    instructions: 'Values longer than this many characters are shown side by side instead of word-diffed. The comparison still reports that they changed.'|t('visorr'),
+    id: 'maxDiffLength',
+    name: 'settings[maxDiffLength]',
+    type: 'number',
+    size: 10,
+    value: settings.maxDiffLength,
+    errors: settings.getErrors('maxDiffLength'),
+}) }}
+
+<hr>
+
+<h2>{{ 'Pruning'|t('visorr') }}</h2>
+
+{{ forms.lightswitchField({
+    label: 'Hard delete'|t('visorr'),
+    instructions: 'On, pruned revisions are removed outright. A soft-deleted revision keeps every row it was taking up, which defeats the point of pruning.'|t('visorr'),
+    id: 'hardDelete',
+    name: 'settings[hardDelete]',
+    on: settings.hardDelete,
+}) }}
+
+{{ forms.textField({
+    label: 'Batch size'|t('visorr'),
+    instructions: 'How many revisions one run deletes before stopping. A follow-up run picks up where it left off.'|t('visorr'),
+    id: 'pruneBatchSize',
+    name: 'settings[pruneBatchSize]',
+    type: 'number',
+    size: 8,
+    value: settings.pruneBatchSize,
+    errors: settings.getErrors('pruneBatchSize'),
+}) }}
+
+{{ forms.lightswitchField({
+    label: 'Scheduled pruning'|t('visorr'),
+    instructions: isPro ? 'Runs a site-wide prune on a schedule.'|t('visorr') : 'A Visorr Pro feature.'|t('visorr'),
+    id: 'scheduleEnabled',
+    name: 'settings[scheduleEnabled]',
+    on: settings.scheduleEnabled,
+    disabled: not isPro,
+}) }}
+
+{{ forms.selectField({
+    label: 'Schedule trigger'|t('visorr'),
+    instructions: 'A real cron job calling `visorr/prune/apply --due` is the reliable one. Control-panel traffic is the fallback for sites without cron — it only ever queues a job.'|t('visorr'),
+    id: 'scheduleTrigger',
+    name: 'settings[scheduleTrigger]',
+    options: [
+        { label: 'Cron'|t('visorr'), value: 'cron' },
+        { label: 'Control panel traffic'|t('visorr'), value: 'web' },
+    ],
+    value: settings.scheduleTrigger,
+}) }}
+
+{{ forms.textField({
+    label: 'Hours between prunes'|t('visorr'),
+    id: 'scheduleIntervalHours',
+    name: 'settings[scheduleIntervalHours]',
+    type: 'number',
+    size: 6,
+    value: settings.scheduleIntervalHours,
+    errors: settings.getErrors('scheduleIntervalHours'),
+}) }}
+
+<hr>
+
+<h2>{{ 'Multi-site history'|t('visorr') }}</h2>
+
+<p class="light">
+    {{ 'An element shared across sites has one revision history, so every site’s editors see every other site’s work in one list. Visorr records which site each revision was authored from — in every edition — and can filter the control panel accordingly.'|t('visorr') }}
+</p>
+
+{{ forms.lightswitchField({
+    label: 'Filter revision history by site'|t('visorr'),
+    instructions: isPro ? null : 'A Visorr Pro feature.'|t('visorr'),
+    id: 'siteFilterEnabled',
+    name: 'settings[siteFilterEnabled]',
+    on: settings.siteFilterEnabled,
+    disabled: not isPro,
+}) }}
+
+{{ forms.selectField({
+    label: 'Apply to'|t('visorr'),
+    id: 'siteFilterMode',
+    name: 'settings[siteFilterMode]',
+    options: [
+        { label: 'Elements shared across sites'|t('visorr'), value: 'auto' },
+        { label: 'Selected sections only'|t('visorr'), value: 'selected' },
+        { label: 'Everything'|t('visorr'), value: 'all' },
+    ],
+    value: settings.siteFilterMode,
+}) }}
+
+{{ forms.checkboxSelectField({
+    label: 'Sections'|t('visorr'),
+    instructions: 'Used when “Selected sections only” is chosen.'|t('visorr'),
+    id: 'siteFilterSectionUids',
+    name: 'settings[siteFilterSectionUids]',
+    options: sections|map(s => { label: s.name, value: s.uid }),
+    values: settings.siteFilterSectionUids,
+}) }}
+
+{{ forms.lightswitchField({
+    label: 'Show untracked revisions on the primary site'|t('visorr'),
+    instructions: 'Revisions from before Visorr was installed have no recorded site. Off, they appear nowhere — which looks exactly like data loss.'|t('visorr'),
+    id: 'siteFilterLegacyOnPrimary',
+    name: 'settings[siteFilterLegacyOnPrimary]',
+    on: settings.siteFilterLegacyOnPrimary,
+}) }}

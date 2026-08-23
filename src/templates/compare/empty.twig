@@ -1,0 +1,9 @@
+<p class="visorr-empty">
+    {{ '“{title}” has no revisions yet. Craft writes one the next time it is saved.'|t('visorr', {
+        title: element.getUiLabel(),
+    }) }}
+</p>
+
+<p class="visorr-empty">
+    <a class="btn" href="{{ element.getCpEditUrl() }}">{{ 'Back to the element'|t('visorr') }}</a>
+</p>

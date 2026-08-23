@@ -1,0 +1,64 @@
+{# The confirmation shown before a selective restore writes anything.
+
+   It describes what is about to be *overwritten*, not what is being put back. Those are
+   different lists, and only one of them is the thing that can be lost. #}
+
+<div class="visorr-restore-confirm">
+    <h2>{{ 'Restore {count} fields?'|t('visorr', { count: plan.count() }) }}</h2>
+
+    {% if not plan.hasChanges() %}
+        <p class="light">{{ 'None of the selected fields differ from what is live. Nothing would change.'|t('visorr') }}</p>
+    {% else %}
+        <p class="light">
+            {{ 'The current values below will be replaced. Everything else on “{title}” is untouched.'|t('visorr', {
+                title: element.getUiLabel(),
+            }) }}
+        </p>
+
+        <table class="data fullwidth">
+            <thead>
+                <tr>
+                    <th scope="col">{{ 'Field'|t('visorr') }}</th>
+                    <th scope="col">{{ 'Now'|t('visorr') }}</th>
+                    <th scope="col">{{ 'After restoring'|t('visorr') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for change in plan.changes %}
+                    <tr>
+                        <th scope="row">{{ change.label }}</th>
+                        <td>{{ change.oldText|slice(0, 160) ?: '—' }}</td>
+                        <td>{{ change.newText|slice(0, 160) ?: '—' }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+    {% if plan.blocked is not empty %}
+        <div class="warning">
+            {{ 'Skipped:'|t('visorr') }}
+            <ul>
+                {% for handle, reason in plan.blocked %}
+                    <li><code>{{ handle }}</code> — {{ reason }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <div class="field">
+        <div class="heading"><label>{{ 'Revision note'|t('visorr') }}</label></div>
+        <div class="input">
+            <input type="text"
+                   class="text fullwidth"
+                   data-visorr-restore-note
+                   placeholder="{{ 'Restored {count} fields with Visorr'|t('visorr', { count: plan.count() }) }}">
+        </div>
+    </div>
+
+    <div class="buttons">
+        <button type="button" class="btn submit" data-visorr-restore-confirm{{ plan.hasChanges() ? '' : ' disabled' }}>
+            {{ 'Restore'|t('visorr') }}
+        </button>
+    </div>
+</div>

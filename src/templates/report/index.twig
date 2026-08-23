@@ -1,0 +1,113 @@
+<div class="visorr-stat-grid">
+    <div class="visorr-stat">
+        <div class="visorr-stat-value">{{ overview.revisions|number_format }}</div>
+        <div class="visorr-stat-label">{{ 'Revisions'|t('visorr') }}</div>
+    </div>
+    <div class="visorr-stat">
+        <div class="visorr-stat-value">{{ storage.formatBytes(overview.bytes) }}</div>
+        <div class="visorr-stat-label">{{ 'Estimated storage'|t('visorr') }}</div>
+    </div>
+    <div class="visorr-stat">
+        <div class="visorr-stat-value">{{ overview.elements|number_format }}</div>
+        <div class="visorr-stat-label">{{ 'Elements with history'|t('visorr') }}</div>
+    </div>
+    <div class="visorr-stat">
+        <div class="visorr-stat-value">{{ storage.formatBytes(overview.largest) }}</div>
+        <div class="visorr-stat-label">{{ 'Largest single revision'|t('visorr') }}</div>
+    </div>
+</div>
+
+<p class="light">
+    {{ 'Sizes are estimates: a revision’s real cost is spread across five tables and their indexes. The ratios between rows are what this report is for.'|t('visorr') }}
+</p>
+
+<h2>{{ 'By section'|t('visorr') }}</h2>
+
+{% set maxBytes = sections is not empty ? sections|map(s => s.bytes)|reduce((a, b) => max(a, b), 1) : 1 %}
+
+<div class="tablepane">
+    <table class="data fullwidth">
+        <thead>
+            <tr>
+                <th scope="col">{{ 'Section'|t('visorr') }}</th>
+                <th scope="col">{{ 'Elements'|t('visorr') }}</th>
+                <th scope="col">{{ 'Revisions'|t('visorr') }}</th>
+                <th scope="col">{{ 'Per element'|t('visorr') }}</th>
+                <th scope="col">{{ 'Storage'|t('visorr') }}</th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in sections %}
+                <tr>
+                    <th scope="row">{{ row.name }}</th>
+                    <td>{{ row.elements|number_format }}</td>
+                    <td>{{ row.revisions|number_format }}</td>
+                    <td>{{ storage.formatBytes(row.perElement) }}</td>
+                    <td>{{ storage.formatBytes(row.bytes) }}</td>
+                    <td>
+                        <div class="visorr-bar"><span style="width: {{ (row.bytes / maxBytes * 100)|round }}%"></span></div>
+                    </td>
+                </tr>
+            {% else %}
+                <tr><td colspan="6" class="light">{{ 'No revision history yet.'|t('visorr') }}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<h2>{{ 'By element type'|t('visorr') }}</h2>
+
+<div class="tablepane">
+    <table class="data fullwidth">
+        <thead>
+            <tr>
+                <th scope="col">{{ 'Element type'|t('visorr') }}</th>
+                <th scope="col">{{ 'Elements'|t('visorr') }}</th>
+                <th scope="col">{{ 'Revisions'|t('visorr') }}</th>
+                <th scope="col">{{ 'Storage'|t('visorr') }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in elementTypes %}
+                <tr>
+                    <th scope="row">{{ row.name }}</th>
+                    <td>{{ row.elements|number_format }}</td>
+                    <td>{{ row.revisions|number_format }}</td>
+                    <td>{{ storage.formatBytes(row.bytes) }}</td>
+                </tr>
+            {% else %}
+                <tr><td colspan="4" class="light">{{ 'No revision history yet.'|t('visorr') }}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<h2>{{ 'Heaviest elements'|t('visorr') }}</h2>
+
+<p class="light">{{ 'The elements a retention policy should name first.'|t('visorr') }}</p>
+
+<div class="tablepane">
+    <table class="data fullwidth">
+        <thead>
+            <tr>
+                <th scope="col">{{ 'Element'|t('visorr') }}</th>
+                <th scope="col">{{ 'Revisions'|t('visorr') }}</th>
+                <th scope="col">{{ 'Storage'|t('visorr') }}</th>
+                <th scope="col" class="thin"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in topElements %}
+                <tr>
+                    <th scope="row">{{ row.title ?: '#' ~ row.canonicalId }}</th>
+                    <td>{{ row.revisions|number_format }}</td>
+                    <td>{{ storage.formatBytes(row.bytes) }}</td>
+                    <td><a class="go" href="{{ url('visorr/history/' ~ row.canonicalId) }}">{{ 'History'|t('visorr') }}</a></td>
+                </tr>
+            {% else %}
+                <tr><td colspan="4" class="light">{{ 'No revision history yet.'|t('visorr') }}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

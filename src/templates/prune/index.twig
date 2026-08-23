@@ -1,0 +1,143 @@
+{% import '_includes/forms.twig' as forms %}
+
+<p class="light">
+    {{ 'Choose what to look at, read exactly what would go, then apply it. The preview and the deletion are the same resolution — what you see is what happens.'|t('visorr') }}
+</p>
+
+<div class="visorr-compare-toolbar" data-visorr-prune-form>
+    {{ forms.selectField({
+        label: 'Scope'|t('visorr'),
+        id: 'visorr-scope',
+        name: 'scope',
+        options: [
+            { label: 'Everything'|t('visorr'), value: 'all' },
+            { label: 'One section'|t('visorr'), value: 'section' },
+            { label: 'One element type'|t('visorr'), value: 'elementType' },
+        ],
+        value: 'all',
+    }) }}
+
+    <div id="visorr-scope-section" class="hidden">
+        {{ forms.selectField({
+            label: 'Section'|t('visorr'),
+            id: 'visorr-section',
+            name: 'sectionUid',
+            options: sections|map(s => { label: s.name, value: s.uid }),
+        }) }}
+    </div>
+
+    <div id="visorr-scope-type" class="hidden">
+        {{ forms.selectField({
+            label: 'Element type'|t('visorr'),
+            id: 'visorr-element-type',
+            name: 'elementType',
+            options: elementTypes|keys|map(k => { label: elementTypes[k], value: k }),
+        }) }}
+    </div>
+
+    {% if craft.app.getIsMultiSite() %}
+        {{ forms.selectField({
+            label: 'Site'|t('visorr'),
+            id: 'visorr-site',
+            name: 'siteId',
+            options: [{ label: 'All sites'|t('visorr'), value: '' }]|merge(sites|map(s => { label: s.name, value: s.id })),
+        }) }}
+    {% endif %}
+
+    <div class="field">
+        <div class="heading"><label>&nbsp;</label></div>
+        <div class="input">
+            <button type="button" class="btn" id="visorr-preview">{{ 'Preview'|t('visorr') }}</button>
+        </div>
+    </div>
+</div>
+
+{% if not isPro %}
+    <div class="notice">
+        {{ 'Visorr Lite prunes one element at a time from its history screen. Pruning a section, an element type or the whole site is a Pro feature.'|t('visorr') }}
+    </div>
+{% endif %}
+
+{% if settings.scheduleEnabled %}
+    <p class="light">
+        {{ 'Scheduled pruning is on, every {hours} hours.'|t('visorr', { hours: settings.scheduleIntervalHours }) }}
+        {% if lastRun %} {{ 'Last run {date}.'|t('visorr', { date: lastRun|datetime('short') }) }}{% endif %}
+        {% if nextDue %} {{ 'Next due {date}.'|t('visorr', { date: nextDue|datetime('short') }) }}{% endif %}
+    </p>
+{% endif %}
+
+<div id="visorr-preview-target"></div>
+
+{% js %}
+    (function () {
+        var scope = document.getElementById('visorr-scope');
+        var sectionRow = document.getElementById('visorr-scope-section');
+        var typeRow = document.getElementById('visorr-scope-type');
+        var target = document.getElementById('visorr-preview-target');
+
+        function syncScope() {
+            sectionRow.classList.toggle('hidden', scope.value !== 'section');
+            typeRow.classList.toggle('hidden', scope.value !== 'elementType');
+        }
+
+        function currentScope() {
+            var site = document.getElementById('visorr-site');
+
+            return {
+                scope: scope.value,
+                sectionUid: document.getElementById('visorr-section') ? document.getElementById('visorr-section').value : null,
+                elementType: document.getElementById('visorr-element-type') ? document.getElementById('visorr-element-type').value : null,
+                siteId: site && site.value ? site.value : null,
+            };
+        }
+
+        scope.addEventListener('change', syncScope);
+        syncScope();
+
+        document.getElementById('visorr-preview').addEventListener('click', function () {
+            target.innerHTML = '<p class="light">' + Craft.t('visorr', 'Working out what would go…') + '</p>';
+
+            Craft.sendActionRequest('POST', 'visorr/prune/preview', { data: currentScope() })
+                .then(function (response) {
+                    target.innerHTML = response.data.html;
+                    bindApply();
+                    if (window.Visorr) {
+                        window.Visorr.initTypedConfirmations(target);
+                    }
+                })
+                .catch(function (error) {
+                    target.innerHTML = '';
+                    Craft.cp.displayError(
+                        (error && error.response && error.response.data && error.response.data.message) ||
+                            Craft.t('visorr', 'Could not build the preview.')
+                    );
+                });
+        });
+
+        function bindApply() {
+            var button = target.querySelector('[data-visorr-confirm-button]');
+
+            if (!button) {
+                return;
+            }
+
+            button.addEventListener('click', function (event) {
+                event.preventDefault();
+                button.disabled = true;
+
+                Craft.sendActionRequest('POST', 'visorr/prune/apply', { data: currentScope() })
+                    .then(function (response) {
+                        Craft.cp.displayNotice(response.data.message);
+                        target.innerHTML = '';
+                    })
+                    .catch(function (error) {
+                        button.disabled = false;
+                        Craft.cp.displayError(
+                            (error && error.response && error.response.data && error.response.data.message) ||
+                                Craft.t('visorr', 'The prune failed.')
+                        );
+                    });
+            });
+        }
+    })();
+{% endjs %}

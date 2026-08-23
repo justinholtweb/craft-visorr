@@ -1,0 +1,69 @@
+{% set counts = plan.countsByCanonical() %}
+
+{% if plan.count() == 0 %}
+    <p class="visorr-empty">
+        {{ 'Nothing would be deleted. Every element in this scope is already within its retention policy.'|t('visorr') }}
+        {% if plan.protectedCount %}
+            <br>{{ '{count} revisions are pinned and would have been kept regardless.'|t('visorr', { count: plan.protectedCount }) }}
+        {% endif %}
+    </p>
+{% else %}
+    <div class="visorr-stat-grid">
+        <div class="visorr-stat">
+            <div class="visorr-stat-value">{{ plan.count()|number_format }}</div>
+            <div class="visorr-stat-label">{{ 'Revisions to delete'|t('visorr') }}</div>
+        </div>
+        <div class="visorr-stat">
+            <div class="visorr-stat-value">{{ storage.formatBytes(plan.bytes()) }}</div>
+            <div class="visorr-stat-label">{{ 'Would be reclaimed'|t('visorr') }}</div>
+        </div>
+        <div class="visorr-stat">
+            <div class="visorr-stat-value">{{ plan.protectedCount|number_format }}</div>
+            <div class="visorr-stat-label">{{ 'Kept — pinned'|t('visorr') }}</div>
+        </div>
+        <div class="visorr-stat">
+            <div class="visorr-stat-value">{{ plan.elementsScanned|number_format }}</div>
+            <div class="visorr-stat-label">{{ 'Elements scanned'|t('visorr') }}</div>
+        </div>
+    </div>
+
+    {% if plan.truncated %}
+        <div class="warning">
+            {{ 'This is one batch. There is more to remove than the batch size allows in a single run — the next run will pick up where this one stops.'|t('visorr') }}
+        </div>
+    {% endif %}
+
+    <div class="tablepane">
+        <table class="data fullwidth">
+            <thead>
+                <tr>
+                    <th scope="col">{{ 'Element'|t('visorr') }}</th>
+                    <th scope="col">{{ 'Revisions going'|t('visorr') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for canonicalId, count in counts|slice(0, 50) %}
+                    <tr>
+                        <th scope="row">
+                            <a href="{{ url('visorr/history/' ~ canonicalId) }}">
+                                {{ plan.canonicalTitles[canonicalId] ?? ('#' ~ canonicalId) }}
+                            </a>
+                        </th>
+                        <td>{{ count }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% if counts|length > 50 %}
+            <p class="light">{{ 'and {count} more elements'|t('visorr', { count: counts|length - 50 }) }}</p>
+        {% endif %}
+    </div>
+
+    <div class="visorr-restore-bar" data-visorr-confirm="{{ 'delete' }}">
+        <label for="visorr-confirm-input">{{ 'Type “delete” to confirm'|t('visorr') }}</label>
+        <input type="text" id="visorr-confirm-input" class="text" data-visorr-confirm-input autocomplete="off">
+        <button type="button" class="btn submit disabled" disabled data-visorr-confirm-button>
+            {{ 'Delete {count} revisions'|t('visorr', { count: plan.count() }) }}
+        </button>
+    </div>
+{% endif %}

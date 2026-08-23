@@ -1,0 +1,41 @@
+{# One nested block inside a nested field. `blockDiff` is a BlockDiff. #}
+
+{% set showUnchanged = showUnchanged ?? false %}
+{% set statusLabels = {
+    added: 'added'|t('visorr'),
+    removed: 'removed'|t('visorr'),
+    changed: 'changed'|t('visorr'),
+    moved: 'moved'|t('visorr'),
+    unchanged: 'unchanged'|t('visorr'),
+} %}
+
+{% if blockDiff.status != 'unchanged' or showUnchanged %}
+    <div class="visorr-block visorr-block--{{ blockDiff.status }}">
+        <header>
+            <strong>{{ blockDiff.label }}</strong>
+            <span class="visorr-handle">{{ blockDiff.type }}</span>
+            <span class="visorr-spacer"></span>
+
+            {% if blockDiff.status == 'moved' %}
+                <span class="visorr-badge">
+                    {{ 'moved {from} → {to}'|t('visorr', {
+                        from: blockDiff.oldPosition + 1,
+                        to: blockDiff.newPosition + 1,
+                    }) }}
+                </span>
+            {% else %}
+                <span class="visorr-badge">{{ statusLabels[blockDiff.status] ?? blockDiff.status }}</span>
+            {% endif %}
+        </header>
+
+        {% if blockDiff.status != 'moved' %}
+            {% for field in blockDiff.fields %}
+                {% include 'visorr/_partials/field-diff' with {
+                    diff: field,
+                    restorable: false,
+                    showUnchanged: false,
+                } only %}
+            {% endfor %}
+        {% endif %}
+    </div>
+{% endif %}

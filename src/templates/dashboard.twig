@@ -1,0 +1,139 @@
+<div class="visorr-stat-grid">
+    <div class="visorr-stat">
+        <div class="visorr-stat-value">{{ overview.revisions|number_format }}</div>
+        <div class="visorr-stat-label">{{ 'Revisions stored'|t('visorr') }}</div>
+    </div>
+    <div class="visorr-stat">
+        <div class="visorr-stat-value">{{ storage.formatBytes(overview.bytes) }}</div>
+        <div class="visorr-stat-label">{{ 'Estimated storage'|t('visorr') }}</div>
+    </div>
+    <div class="visorr-stat">
+        <div class="visorr-stat-value">{{ overview.elements|number_format }}</div>
+        <div class="visorr-stat-label">{{ 'Elements with history'|t('visorr') }}</div>
+    </div>
+    <div class="visorr-stat">
+        <div class="visorr-stat-value">{{ overview.pinned|number_format }}</div>
+        <div class="visorr-stat-label">{{ 'Pinned'|t('visorr') }}</div>
+    </div>
+</div>
+
+<h2>{{ 'What governs this history'|t('visorr') }}</h2>
+
+{% if isPro and policies is not empty %}
+    <div class="tablepane">
+        <table class="data fullwidth">
+            <thead>
+                <tr>
+                    <th scope="col">{{ 'Scope'|t('visorr') }}</th>
+                    <th scope="col">{{ 'Keep'|t('visorr') }}</th>
+                    <th scope="col">{{ 'Expire after'|t('visorr') }}</th>
+                    <th scope="col">{{ 'Floor'|t('visorr') }}</th>
+                    <th scope="col">{{ 'Enabled'|t('visorr') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for policy in policies %}
+                    <tr>
+                        <th scope="row">
+                            {{ policy.elementType == '*' ? 'Any element type'|t('visorr') : policy.elementType|split('\\')|last }}
+                            {% if policy.sectionUid %}
+                                {% set section = craft.app.entries.getSectionByUid(policy.sectionUid) %}
+                                <span class="light">· {{ section ? section.name : policy.sectionUid }}</span>
+                            {% endif %}
+                            {% if policy.siteUid %}
+                                <span class="light">· {{ policy.siteUid }}</span>
+                            {% endif %}
+                        </th>
+                        <td>{{ policy.maxRevisions ?? '∞' }}</td>
+                        <td>{{ policy.maxAgeDays ? '{days} days'|t('visorr', { days: policy.maxAgeDays }) : '—' }}</td>
+                        <td>{{ policy.minKeep }}</td>
+                        <td>{{ policy.enabled ? 'Yes'|t('visorr') : 'No'|t('visorr') }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <p class="light">
+        {% if craftMax %}
+            {{ 'No Visorr policies. Craft’s own maxRevisions setting is keeping {count} revisions per element.'|t('visorr', { count: craftMax }) }}
+        {% else %}
+            {{ 'Nothing is pruning revisions. Craft’s maxRevisions is disabled and Visorr has no policies, so history grows without limit.'|t('visorr') }}
+        {% endif %}
+        {% if not isPro %}
+            <br>{{ 'Retention policies are a Visorr Pro feature.'|t('visorr') }}
+        {% endif %}
+    </p>
+{% endif %}
+
+{% if isPro %}
+    <h2>{{ 'Heaviest elements'|t('visorr') }}</h2>
+
+    {% if topElements is empty %}
+        <p class="light">{{ 'No revision history yet.'|t('visorr') }}</p>
+    {% else %}
+        <div class="tablepane">
+            <table class="data fullwidth">
+                <thead>
+                    <tr>
+                        <th scope="col">{{ 'Element'|t('visorr') }}</th>
+                        <th scope="col">{{ 'Revisions'|t('visorr') }}</th>
+                        <th scope="col">{{ 'Size'|t('visorr') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in topElements %}
+                        <tr>
+                            <th scope="row">
+                                <a href="{{ url('visorr/history/' ~ row.canonicalId) }}">{{ row.title ?: '#' ~ row.canonicalId }}</a>
+                            </th>
+                            <td>{{ row.revisions }}</td>
+                            <td>{{ storage.formatBytes(row.bytes) }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <p><a class="go" href="{{ url('visorr/report') }}">{{ 'Full storage report'|t('visorr') }}</a></p>
+    {% endif %}
+{% endif %}
+
+<h2>{{ 'Pruning'|t('visorr') }}</h2>
+
+<p class="light">
+    {{ '{count} revisions removed across {runs} runs, reclaiming {size}.'|t('visorr', {
+        count: totals.deleted|number_format,
+        runs: totals.runs|number_format,
+        size: storage.formatBytes(totals.bytes),
+    }) }}
+    {% if settings.scheduleEnabled and nextDue %}
+        <br>{{ 'Next scheduled prune: {date}'|t('visorr', { date: nextDue|datetime('short') }) }}
+    {% endif %}
+</p>
+
+{% if recentRuns is not empty %}
+    <div class="tablepane">
+        <table class="data fullwidth">
+            <thead>
+                <tr>
+                    <th scope="col">{{ 'When'|t('visorr') }}</th>
+                    <th scope="col">{{ 'Scope'|t('visorr') }}</th>
+                    <th scope="col">{{ 'Planned'|t('visorr') }}</th>
+                    <th scope="col">{{ 'Deleted'|t('visorr') }}</th>
+                    <th scope="col">{{ 'Reclaimed'|t('visorr') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for run in recentRuns %}
+                    <tr>
+                        <th scope="row"><a href="{{ url('visorr/runs/' ~ run.id) }}">{{ run.dateCreated|datetime('short') }}</a></th>
+                        <td>{{ run.scope }}</td>
+                        <td>{{ run.plannedCount }}</td>
+                        <td>{{ run.deletedCount }}</td>
+                        <td>{{ storage.formatBytes(run.freedBytes) }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endif %}

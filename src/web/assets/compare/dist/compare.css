@@ -1,0 +1,175 @@
+/* Visorr — the comparison screen. */
+
+.visorr-compare-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px;
+    padding: 12px 14px;
+    background: var(--gray-050, #f3f7fc);
+    border: 1px solid var(--hairline-color);
+    border-radius: var(--large-border-radius, 8px);
+    margin-bottom: 18px;
+}
+
+.visorr-compare-toolbar .field {
+    margin: 0;
+}
+
+.visorr-compare-summary {
+    color: var(--medium-text-color);
+    font-size: 13px;
+    margin-left: auto;
+    text-align: right;
+}
+
+.visorr-field-diff {
+    border: 1px solid var(--hairline-color);
+    border-radius: var(--large-border-radius, 8px);
+    margin-bottom: 14px;
+    overflow: hidden;
+}
+
+.visorr-field-diff.visorr-unchanged {
+    opacity: 0.6;
+}
+
+.visorr-field-diff > header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    background: var(--gray-050, #f3f7fc);
+    border-bottom: 1px solid var(--hairline-color);
+}
+
+.visorr-field-diff > header h3 {
+    margin: 0;
+    font-size: 14px;
+}
+
+.visorr-field-diff > header .visorr-handle {
+    color: var(--medium-text-color);
+    font-family: var(--mono-font, monospace);
+    font-size: 12px;
+}
+
+.visorr-field-diff > header .visorr-spacer {
+    margin-left: auto;
+}
+
+.visorr-diff-body {
+    padding: 10px 12px;
+    font-size: 13px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-x: auto;
+}
+
+/* The three run styles. `ins`/`del` are the correct elements semantically — a screen reader
+   announces them as insertions and deletions, which is exactly what they are — so the styling
+   only has to remove the browser's default underline and strike. */
+.visorr-diff-body ins.visorr-ins {
+    background: color-mix(in srgb, var(--enabled-color, #27ab83) 22%, transparent);
+    text-decoration: none;
+    border-radius: 2px;
+    padding: 0 1px;
+}
+
+.visorr-diff-body del.visorr-del {
+    background: color-mix(in srgb, var(--error-color, #cf1124) 20%, transparent);
+    text-decoration: line-through;
+    border-radius: 2px;
+    padding: 0 1px;
+}
+
+.visorr-side-by-side {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+}
+
+.visorr-side-by-side > div {
+    padding: 10px 12px;
+    font-size: 13px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-x: auto;
+}
+
+.visorr-side-by-side > div:first-child {
+    border-right: 1px solid var(--hairline-color);
+    background: color-mix(in srgb, var(--error-color, #cf1124) 5%, transparent);
+}
+
+.visorr-side-by-side > div:last-child {
+    background: color-mix(in srgb, var(--enabled-color, #27ab83) 5%, transparent);
+}
+
+@media (max-width: 760px) {
+    .visorr-side-by-side {
+        grid-template-columns: 1fr;
+    }
+
+    .visorr-side-by-side > div:first-child {
+        border-right: 0;
+        border-bottom: 1px solid var(--hairline-color);
+    }
+}
+
+.visorr-block {
+    border-top: 1px solid var(--hairline-color);
+}
+
+.visorr-block > header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 12px;
+    font-size: 12px;
+    color: var(--medium-text-color);
+}
+
+.visorr-block--added > header {
+    background: color-mix(in srgb, var(--enabled-color, #27ab83) 10%, transparent);
+}
+
+.visorr-block--removed > header {
+    background: color-mix(in srgb, var(--error-color, #cf1124) 10%, transparent);
+}
+
+.visorr-block--changed > header {
+    background: color-mix(in srgb, var(--link-color, #0b69a3) 10%, transparent);
+}
+
+.visorr-block--moved > header {
+    background: color-mix(in srgb, var(--warning-color, #cb6e17) 10%, transparent);
+}
+
+.visorr-block .visorr-field-diff {
+    border: 0;
+    border-radius: 0;
+    margin: 0;
+    border-top: 1px dashed var(--hairline-color);
+}
+
+.visorr-restore-bar {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    margin-top: 18px;
+    background: var(--gray-050, #f3f7fc);
+    border: 1px solid var(--hairline-color);
+    border-radius: var(--large-border-radius, 8px);
+}
+
+.visorr-restore-bar .visorr-count {
+    color: var(--medium-text-color);
+    font-size: 13px;
+}

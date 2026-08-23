@@ -1,0 +1,55 @@
+{# The Visorr panel on element edit screens.
+
+   Deliberately small. It answers "how much history is there, what governs it, and where do I
+   go to read it" — the three things you want before you decide to open anything. #}
+
+{% set visorr = craft.app.plugins.getPlugin('visorr') %}
+
+<div class="visorr-panel" data-visorr-panel>
+    <h4>
+        {{ 'Revisions'|t('visorr') }}
+        <span class="visorr-badge">{{ total }}</span>
+    </h4>
+
+    <div class="visorr-meta">
+        {% if retention.isUnlimited() %}
+            {{ 'Nothing is being pruned.'|t('visorr') }}
+        {% else %}
+            {{ retention.description }}
+        {% endif %}
+    </div>
+
+    {% if infos is not empty %}
+        <ul class="visorr-revision-list">
+            {% for info in infos %}
+                <li data-visorr-revision{{ info.pinned ? ' class="visorr-is-pinned"' : '' }}>
+                    <span class="visorr-num">#{{ info.num }}</span>
+                    <span>
+                        {{ info.dateCreated ? info.dateCreated|datetime('short') : '—' }}
+                        {% if info.creatorName %}<span class="light">· {{ info.creatorName }}</span>{% endif %}
+                        {% if info.isCurrent %}<span class="visorr-badge visorr-badge--current">{{ 'current'|t('visorr') }}</span>{% endif %}
+                    </span>
+
+                    {% if currentUser.can('visorr:pin') %}
+                        <button type="button"
+                                class="visorr-pin"
+                                data-visorr-pin="{{ info.revisionId }}"
+                                aria-pressed="{{ info.pinned ? 'true' : 'false' }}"
+                                title="{{ info.pinned ? 'Pinned — pruning will leave this revision alone'|t('visorr') : 'Pin this revision'|t('visorr') }}">📌</button>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="visorr-meta">{{ 'No revisions yet.'|t('visorr') }}</p>
+    {% endif %}
+
+    <div class="buttons" style="margin-top: 10px;">
+        <a class="btn small" href="{{ url('visorr/compare/' ~ canonical.id, { siteId: element.siteId }) }}">
+            {{ 'Compare'|t('visorr') }}
+        </a>
+        <a class="btn small" href="{{ url('visorr/history/' ~ canonical.id, { siteId: element.siteId }) }}">
+            {{ 'All history'|t('visorr') }}
+        </a>
+    </div>
+</div>

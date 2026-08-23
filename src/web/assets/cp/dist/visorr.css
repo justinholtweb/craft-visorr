@@ -1,0 +1,127 @@
+/* Visorr — shared control-panel styling.
+   Colours come from Craft's own CSS custom properties wherever one exists, so the plugin
+   follows the control panel into dark mode without a second palette to keep in step. */
+
+.visorr-panel {
+    border-top: 1px solid var(--hairline-color);
+    padding-top: 12px;
+    margin-top: 12px;
+}
+
+.visorr-panel h4 {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+
+.visorr-panel .visorr-meta {
+    color: var(--medium-text-color);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.visorr-revision-list {
+    list-style: none;
+    margin: 8px 0 0;
+    padding: 0;
+    font-size: 12px;
+}
+
+.visorr-revision-list li {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    padding: 3px 0;
+    border-bottom: 1px solid var(--hairline-color);
+}
+
+.visorr-revision-list li:last-child {
+    border-bottom: 0;
+}
+
+.visorr-revision-list .visorr-num {
+    color: var(--medium-text-color);
+    font-variant-numeric: tabular-nums;
+    min-width: 2.5em;
+}
+
+.visorr-pin {
+    background: none;
+    border: 0;
+    cursor: pointer;
+    padding: 0 2px;
+    line-height: 1;
+    color: var(--medium-text-color);
+}
+
+.visorr-pin[aria-pressed="true"] {
+    color: var(--warning-color, #cf1124);
+}
+
+.visorr-badge {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 9px;
+    font-size: 11px;
+    background: var(--gray-100);
+    color: var(--medium-text-color);
+}
+
+.visorr-badge--pinned {
+    background: color-mix(in srgb, var(--warning-color, #cf1124) 15%, transparent);
+    color: var(--warning-color, #cf1124);
+}
+
+.visorr-badge--current {
+    background: color-mix(in srgb, var(--enabled-color, #27ab83) 18%, transparent);
+    color: var(--enabled-color, #27ab83);
+}
+
+.visorr-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.visorr-stat {
+    background: var(--gray-050, #f3f7fc);
+    border: 1px solid var(--hairline-color);
+    border-radius: var(--large-border-radius, 8px);
+    padding: 14px 16px;
+}
+
+.visorr-stat .visorr-stat-value {
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+}
+
+.visorr-stat .visorr-stat-label {
+    color: var(--medium-text-color);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.visorr-bar {
+    height: 6px;
+    border-radius: 3px;
+    background: var(--gray-200, #cdd8e4);
+    overflow: hidden;
+    min-width: 60px;
+}
+
+.visorr-bar span {
+    display: block;
+    height: 100%;
+    background: var(--link-color, #0b69a3);
+}
+
+.visorr-empty {
+    color: var(--medium-text-color);
+    padding: 24px 0;
+    text-align: center;
+}

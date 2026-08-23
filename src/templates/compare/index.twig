@@ -1,0 +1,89 @@
+{% import '_includes/forms.twig' as forms %}
+
+{% set changed = diff.changedFields() %}
+
+<form data-visorr-compare-form class="visorr-compare-toolbar">
+    {{ forms.selectField({
+        label: 'Older'|t('visorr'),
+        name: 'left',
+        options: options,
+        value: leftId,
+    }) }}
+
+    <div class="field">
+        <div class="heading"><label>&nbsp;</label></div>
+        <div class="input">
+            <button type="button" class="btn" data-visorr-swap title="{{ 'Swap sides'|t('visorr') }}">⇄</button>
+        </div>
+    </div>
+
+    {{ forms.selectField({
+        label: 'Newer'|t('visorr'),
+        name: 'right',
+        options: options,
+        value: rightId,
+    }) }}
+
+    <div class="visorr-compare-summary">
+        {% if diff.hasChanges() %}
+            {{ '{count} of {total} fields changed'|t('visorr', {
+                count: changed|length,
+                total: diff.fields|length,
+            }) }}
+        {% else %}
+            {{ 'These two versions are identical.'|t('visorr') }}
+        {% endif %}
+        <br>
+        <span class="light">{{ 'compared in {ms}ms'|t('visorr', { ms: diff.elapsedMs }) }}</span>
+    </div>
+</form>
+
+{% if diff.unreadable is not empty %}
+    <div class="warning">
+        {{ 'Some fields could not be read on one side: {fields}. They are usually from a plugin that has since been removed.'|t('visorr', {
+            fields: diff.unreadable|join(', '),
+        }) }}
+    </div>
+{% endif %}
+
+{% if not diff.hasChanges() %}
+    <p class="visorr-empty">{{ 'Nothing changed between these two versions.'|t('visorr') }}</p>
+{% endif %}
+
+{% set restorable = canRestore and rightId != 0 %}
+
+{% if restorable %}
+    <p class="light">
+        {{ 'Tick the fields you want to put back from {label}. Everything you leave unticked stays exactly as it is now.'|t('visorr', {
+            label: diff.rightInfo ? diff.rightInfo.label() : 'this revision'|t('visorr'),
+        }) }}
+        <label class="visorr-select-all">
+            <input type="checkbox" class="checkbox" data-visorr-restore-all>
+            <span>{{ 'select all changed'|t('visorr') }}</span>
+        </label>
+    </p>
+{% endif %}
+
+{% for field in diff.sortedFields() %}
+    {% include 'visorr/_partials/field-diff' with {
+        diff: field,
+        restorable: restorable,
+        showUnchanged: settings.showUnchangedFields,
+    } only %}
+{% endfor %}
+
+{% if restorable %}
+    <div class="visorr-restore-bar"
+         data-visorr-restore-bar
+         data-visorr-element-id="{{ element.id }}"
+         data-visorr-revision-id="{{ rightId }}"
+         data-visorr-site-id="{{ element.siteId }}">
+        <span class="visorr-count" data-visorr-restore-count>{{ '0 fields selected'|t('visorr') }}</span>
+        <button type="button" class="btn submit disabled" disabled data-visorr-restore-button>
+            {{ 'Restore selected fields'|t('visorr') }}
+        </button>
+        <span class="light">
+            {{ 'A restore saves the element, so it creates a revision of its own — you can undo it.'|t('visorr') }}
+        </span>
+    </div>
+{% endif %}

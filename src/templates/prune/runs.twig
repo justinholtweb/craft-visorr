@@ -1,0 +1,50 @@
+<p class="light">
+    {{ 'Every prune records what it planned to delete alongside what it actually deleted. When the two disagree — a pin added between the preview and the confirmation, an element deleted by someone else — the gap is the interesting part.'|t('visorr') }}
+</p>
+
+<p>
+    <a class="btn small{{ showDryRuns ? ' active' : '' }}" href="{{ url('visorr/runs', showDryRuns ? {} : { dryRuns: 1 }) }}">
+        {{ showDryRuns ? 'Hide dry runs'|t('visorr') : 'Include dry runs'|t('visorr') }}
+    </a>
+</p>
+
+{% if runs is empty %}
+    <p class="visorr-empty">{{ 'Nothing has been pruned yet.'|t('visorr') }}</p>
+{% else %}
+    <div class="tablepane">
+        <table class="data fullwidth">
+            <thead>
+                <tr>
+                    <th scope="col">{{ 'When'|t('visorr') }}</th>
+                    <th scope="col">{{ 'Scope'|t('visorr') }}</th>
+                    <th scope="col">{{ 'Trigger'|t('visorr') }}</th>
+                    <th scope="col">{{ 'Planned'|t('visorr') }}</th>
+                    <th scope="col">{{ 'Deleted'|t('visorr') }}</th>
+                    <th scope="col">{{ 'Pinned'|t('visorr') }}</th>
+                    <th scope="col">{{ 'Reclaimed'|t('visorr') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for run in runs %}
+                    <tr>
+                        <th scope="row">
+                            <a href="{{ url('visorr/runs/' ~ run.id) }}">{{ run.dateCreated|datetime('short') }}</a>
+                            {% if not run.applied %}<span class="visorr-badge">{{ 'dry run'|t('visorr') }}</span>{% endif %}
+                        </th>
+                        <td>{{ run.scope }}{% if run.sectionUid %} <span class="light">{{ run.sectionUid }}</span>{% endif %}</td>
+                        <td>{{ run.trigger }}</td>
+                        <td>{{ run.plannedCount }}</td>
+                        <td>
+                            {{ run.deletedCount }}
+                            {% if run.applied and run.deletedCount != run.plannedCount %}
+                                <span class="visorr-badge" title="{{ 'The outcome differed from the plan.'|t('visorr') }}">≠</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ run.protectedCount }}</td>
+                        <td>{{ storage.formatBytes(run.freedBytes) }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endif %}

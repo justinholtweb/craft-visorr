@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<!-- handmade: hand-tuned deck -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Visorr — Plugin Store promos</title>
+<link rel="stylesheet" href="fonts.css">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --ink: #06120F;
+    --ink-light: #0B1B18;
+    --ink-lighter: #12312B;
+    --accent: #0F766E;
+    --accent-light: #2DA898;
+    --sky: #7FD9CB;
+    --green: #4ade80;
+    --off-white: #f1f5f9;
+  }
+
+  html { background: #000; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    color: var(--off-white);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---- slide shell ---------------------------------------------------- */
+  .slide {
+    position: relative;
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse at 85% 15%, rgba(15, 118, 110, 0.30) 0%, transparent 40%),
+      radial-gradient(ellipse at 65% 5%,  rgba(45, 168, 152, 0.13) 0%, transparent 35%),
+      radial-gradient(ellipse at 15% 85%, rgba(127, 217, 203, 0.07) 0%, transparent 40%),
+      radial-gradient(ellipse at 35% 95%, rgba(15, 118, 110, 0.10) 0%, transparent 35%),
+      linear-gradient(135deg, #06120F 0%, #0B1B18 30%, #14403A 60%, #06120F 100%);
+  }
+
+  /* Oversized watermark, echoing the app icon.
+
+     The eyeshade is a wide, short shape — wider than the ray gun the deck was built for — so the
+     mark is cropped tight to the glyph in the SVG itself (viewBox 10 30 80 40) rather than left
+     floating in a square box with the band stranded in the middle of it. Stroked, not filled:
+     a filled brim at 5% is one soft grey lozenge, and the band, the tabs and the seam between
+     band and brim all disappear into it. As line art every part still reads.
+
+     The stroke is 0.7 in an 80-unit viewBox — about 10px once the mark is scaled to 1180px. At
+     1.3 it came out at 19px, which at 5% opacity is not texture behind the type but a hard
+     outline crossing it, and the wordmark on the cover looked boxed in.  */
+  .slide::after {
+    content: '';
+    position: absolute;
+    top: 17%;
+    left: -7%;
+    width: 1180px;
+    height: 590px;
+    background: url('assets/watermark.svg') no-repeat center / contain;
+    opacity: 0.05;
+    pointer-events: none;
+  }
+
+  /* Hairline along the top edge, carried over from the family deck */
+  .slide::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 6px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-light), var(--sky), var(--accent));
+    z-index: 5;
+  }
+
+  .inner {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    padding: 118px 130px;
+    display: flex;
+    align-items: center;
+  }
+
+  /* ---- type ------------------------------------------------------------ */
+  .eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    font-size: 20px;
+    font-weight: 500;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: rgba(241, 245, 249, 0.62);
+    margin-bottom: 34px;
+  }
+  .eyebrow .rule {
+    width: 58px;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--accent-light);
+  }
+
+  h1, h2 {
+    font-family: 'Jersey 20', sans-serif;
+    font-weight: 400;
+    line-height: 0.9;
+    letter-spacing: 0.005em;
+  }
+
+  .gradient-text {
+    background: linear-gradient(100deg, #0F766E 0%, #2DA898 34%, #7FD9CB 66%, #0F766E 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .lede {
+    font-size: 34px;
+    line-height: 1.5;
+    color: rgba(241, 245, 249, 0.72);
+  }
+
+  .mono {
+    font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  }
+
+  /* ---- cover slide ----------------------------------------------------- */
+  .cover .inner { gap: 90px; }
+  .cover .copy { flex: 1 1 auto; }
+  .cover h1 { font-size: 320px; margin-bottom: 18px; }
+  .cover .tagline {
+    font-family: 'Jersey 20', sans-serif;
+    font-size: 60px;
+    line-height: 1.02;
+    color: var(--off-white);
+    margin-bottom: 40px;
+    max-width: 15ch;
+  }
+  .cover .lede { max-width: 34ch; font-size: 30px; }
+
+  .cover .mark {
+    flex: 0 0 auto;
+    width: 460px;
+    height: 460px;
+    filter: drop-shadow(14px 14px 0 rgba(0, 0, 0, 0.35));
+  }
+  .cover .mark img { width: 100%; height: 100%; display: block; }
+
+  .badges { display: flex; gap: 16px; margin-top: 52px; }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 26px;
+    font-size: 22px;
+    font-weight: 500;
+    color: rgba(241, 245, 249, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 999px;
+  }
+  .badge .dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--accent-light);
+  }
+  .badge.price .dot { background: var(--sky); }
+
+  /* ---- the server/browser statement ------------------------------------ */
+  .statement .inner { flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+  .statement .eyebrow { justify-content: center; }
+  .swap { display: flex; flex-direction: column; align-items: center; gap: 22px; margin-top: 8px; }
+  .swap .caption {
+    font-size: 26px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(241, 245, 249, 0.42);
+  }
+  .swap .before {
+    font-size: 44px;
+    white-space: nowrap;
+    color: rgba(241, 245, 249, 0.34);
+    letter-spacing: 0.01em;
+  }
+  .swap .arrow {
+    width: 4px;
+    height: 62px;
+    border-radius: 2px;
+    background: linear-gradient(180deg, rgba(45, 168, 152, 0.15), var(--accent-light));
+    position: relative;
+  }
+  .swap .arrow::after {
+    content: '';
+    position: absolute;
+    left: 50%; bottom: -4px;
+    width: 18px; height: 18px;
+    transform: translateX(-50%) rotate(45deg);
+    border-right: 4px solid var(--accent-light);
+    border-bottom: 4px solid var(--accent-light);
+    border-radius: 2px;
+  }
+  /* Longer than Bed's one-liner: at 70px this ran the full 1920 and touched both edges. */
+  .swap .after {
+    font-size: 54px;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+  }
+  .statement .lede { margin-top: 40px; max-width: 44ch; font-size: 32px; }
+
+  /* ---- feature slides -------------------------------------------------- */
+  .feature .inner { align-items: center; }
+  .feature .copy { width: 780px; flex: 0 0 780px; }
+  .feature h2 { font-size: 108px; margin-bottom: 30px; }
+  .feature .lede { max-width: 21ch; }
+
+  .points {
+    list-style: none;
+    margin-top: 44px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .points li {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    font-size: 25px;
+    line-height: 1.4;
+    color: rgba(241, 245, 249, 0.6);
+  }
+  .points li .tick {
+    flex: 0 0 auto;
+    margin-top: 9px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--accent-light);
+  }
+  /* The li is a flex container, so an inline <span class="mono"> or <em> left loose in the
+     text becomes a sibling flex item and picks up the 16px gap on both sides. Every point
+     keeps its text in one .t. */
+  .points li .t { flex: 1 1 auto; }
+
+  /* Right-hand panel shared by the targeting, candidates, version and shelf slides */
+  .panel {
+    position: absolute;
+    top: 50%;
+    left: 900px;
+    right: 130px;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  /* ---- rows: targeting conditions, and candidate bars ------------------- */
+  .rows { display: flex; flex-direction: column; gap: 15px; }
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 26px;
+    padding: 24px 32px;
+    border-radius: 16px;
+    background: rgba(18, 49, 43, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .row .pos { flex: 0 0 62px; font-size: 24px; color: rgba(241, 245, 249, 0.3); }
+  .row .what { flex: 1 1 auto; font-size: 25px; color: rgba(241, 245, 249, 0.78); white-space: nowrap; }
+  .row .state {
+    flex: 0 0 auto;
+    font-size: 19px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(241, 245, 249, 0.4);
+  }
+  /* The winner, and the server half */
+  .row.eager { border-color: rgba(45, 168, 152, 0.5); background: rgba(15, 118, 110, 0.2); }
+  .row.eager .what { color: var(--off-white); font-weight: 600; }
+  .row.eager .state { color: var(--accent-light); }
+  /* Decided in the browser, and the bars that did not get the position */
+  .row.lifted { border-style: dashed; border-color: rgba(127, 217, 203, 0.34); }
+  .row.lifted .state { color: var(--sky); }
+  .row.held .what { color: rgba(241, 245, 249, 0.42); }
+
+  .rows .divider {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin: 8px 4px 2px;
+    font-size: 19px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(241, 245, 249, 0.3);
+  }
+  .rows .divider::after {
+    content: '';
+    flex: 1 1 auto;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.09);
+  }
+
+  /* ---- the before/after comparison -------------------------------------- */
+  .weigh { display: flex; flex-direction: column; gap: 24px; }
+  .side {
+    padding: 40px 40px;
+    border-radius: 18px;
+    background: rgba(18, 49, 43, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .side .chip {
+    display: inline-block;
+    margin-bottom: 20px;
+    padding: 7px 16px;
+    border-radius: 999px;
+    font-size: 18px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(241, 245, 249, 0.4);
+    background: rgba(255, 255, 255, 0.06);
+  }
+  .side .where { font-size: 32px; font-weight: 600; color: var(--off-white); margin-bottom: 16px; }
+  .side .what { font-size: 23px; line-height: 1.5; color: rgba(241, 245, 249, 0.5); }
+  .side.after { border-color: rgba(45, 168, 152, 0.5); background: rgba(15, 118, 110, 0.18); }
+  .side.after .chip { color: var(--accent-light); background: rgba(15, 118, 110, 0.3); }
+  .side.after .what { color: rgba(241, 245, 249, 0.66); }
+
+  /* ---- the capability shelf ---------------------------------------------- */
+  .shelf { display: flex; flex-wrap: wrap; gap: 14px; }
+  .name {
+    padding: 15px 24px;
+    border-radius: 12px;
+    font-size: 25px;
+    color: rgba(241, 245, 249, 0.62);
+    background: rgba(18, 49, 43, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .name.client { border-style: dashed; color: var(--sky); }
+  .name.more { color: rgba(241, 245, 249, 0.3); border-color: transparent; background: none; }
+
+  /* ---- terminal --------------------------------------------------------- */
+  .term {
+    position: absolute;
+    top: 50%;
+    left: 900px;
+    right: -110px;
+    transform: translateY(-50%);
+    border-radius: 14px; overflow: hidden; box-shadow: 0 30px 90px rgba(0, 0, 0, 0.55); border: 1px solid rgba(255, 255, 255, 0.08); }
+  .term .chrome {
+    height: 44px;
+    background: #16342E;
+    background-image:
+      radial-gradient(circle at 26px 22px, #ff5f57 6.5px, transparent 7px),
+      radial-gradient(circle at 52px 22px, #ffbd2e 6.5px, transparent 7px),
+      radial-gradient(circle at 78px 22px, #28ca42 6.5px, transparent 7px);
+  }
+  .term .body {
+    background: #050F0D;
+    padding: 40px 44px;
+    font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 22px;
+    line-height: 1.95;
+    white-space: pre;
+  }
+  .term .prompt { color: var(--accent-light); }
+  .term .cmd { color: var(--off-white); }
+  .term .out { color: rgba(241, 245, 249, 0.45); }
+  .term .head { color: rgba(241, 245, 249, 0.28); }
+  .term .ok { color: var(--green); }
+  .term .warn { color: var(--sky); }
+  .term .blank { display: block; height: 20px; }
+
+  /* ---- footer lockup --------------------------------------------------- */
+  .footer {
+    position: absolute;
+    left: 130px;
+    bottom: 62px;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    font-size: 22px;
+    letter-spacing: 0.06em;
+    color: rgba(241, 245, 249, 0.4);
+  }
+  .footer img { width: 40px; height: 40px; border-radius: 9px; }
+  .footer b { color: rgba(241, 245, 249, 0.72); font-weight: 600; }
+
+  /* Only render the requested slide when screenshotting */
+  body.single .slide { display: none; }
+  body.single .slide.active { display: block; }
+</style>
+</head>
+<body>
+
+<!-- 1 · Cover ============================================================ -->
+<section class="slide cover" data-n="1">
+  <div class="inner">
+    <div class="copy">
+      <div class="eyebrow"><span class="rule"></span> Craft CMS 5</div>
+      <h1 class="gradient-text">Visorr</h1>
+      <p class="tagline">See what actually&nbsp;changed.</p>
+      <p class="lede">Craft writes a complete copy of your entry every time you save it, then
+        offers you a list of dates. Visorr makes that history readable, actionable and affordable.</p>
+      <div class="badges">
+        <span class="badge price"><span class="dot"></span> Free &nbsp;·&nbsp; Pro $49</span>
+        <span class="badge">Craft 5.3+ · PHP 8.2+ · no dependencies</span>
+      </div>
+    </div>
+    <div class="mark"><img src="assets/icon.svg" alt=""></div>
+  </div>
+</section>
+
+<!-- 2 · A list of dates vs a list of changes ============================= -->
+<section class="slide statement" data-n="2">
+  <div class="inner">
+    <div class="eyebrow"><span class="rule"></span> The whole idea</div>
+    <div class="swap">
+      <span class="caption">What changed between Tuesday and the relaunch?</span>
+      <span class="before mono">Revision 47 · 14:12 · Ada&nbsp; /* Craft&rsquo;s answer */</span>
+      <span class="arrow"></span>
+      <span class="caption">Visorr answers the question you actually asked.</span>
+      <span class="after mono gradient-text">Hero · 6 words · +2 blocks&nbsp; /* Visorr&rsquo;s */</span>
+    </div>
+    <p class="lede">A revision is not a delta. Craft stores a whole copy of the element — so a
+      comparison is &ldquo;load two elements and walk one field layout&rdquo;. No new storage, no
+      new format, and it works on history written long before Visorr was installed.</p>
+  </div>
+  <div class="footer"><img src="assets/icon.svg" alt=""> <b>Visorr</b> &nbsp;·&nbsp; justinholt.com/plugins/craft-visorr</div>
+</section>
+
+<!-- 3 · Compare ========================================================== -->
+<section class="slide feature" data-n="3">
+  <div class="inner">
+    <div class="copy">
+      <div class="eyebrow"><span class="rule"></span> Compare</div>
+      <h2>Changed fields,<br>biggest first</h2>
+      <p class="lede">The screen opens on the comparison you actually wanted.</p>
+      <ul class="points">
+        <li><span class="tick"></span><span class="t">The last revision against what is live, by default</span></li>
+        <li><span class="tick"></span><span class="t">Which Craft cannot do at all, in either direction</span></li>
+        <li><span class="tick"></span><span class="t">Word-level diff, in a few hundred lines of PHP</span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="rows">
+      <div class="divider">Changed</div>
+      <div class="row eager"><span class="what">Hero heading</span><span class="state">6 words</span></div>
+      <div class="row eager"><span class="what">Body</span><span class="state">2 blocks</span></div>
+      <div class="row eager"><span class="what">Summary</span><span class="state">1 word</span></div>
+      <div class="divider">Unchanged</div>
+      <div class="row held"><span class="what">Featured image</span><span class="state">Same</span></div>
+      <div class="row held"><span class="what">Post date</span><span class="state">Same</span></div>
+      <div class="row held"><span class="what">Related case studies</span><span class="state">Same</span></div>
+    </div>
+  </div>
+  <div class="footer"><img src="assets/icon.svg" alt=""> <b>Visorr</b> &nbsp;·&nbsp; justinholt.com/plugins/craft-visorr</div>
+</section>
+
+<!-- 4 · Matrix alignment ================================================= -->
+<section class="slide feature" data-n="4">
+  <div class="inner">
+    <div class="copy">
+      <div class="eyebrow"><span class="rule"></span> Nested elements</div>
+      <h2>Blocks aligned<br>by content</h2>
+      <p class="lede">A revision owns <em>copies</em> of its Matrix blocks, with brand-new IDs.
+        There is nothing to match them on.</p>
+      <ul class="points">
+        <li><span class="tick"></span><span class="t">So Visorr aligns them by content, in three passes</span></li>
+        <li><span class="tick"></span><span class="t">Edit a block and it reads as changed, not rewritten</span></li>
+        <li><span class="tick"></span><span class="t">Without which a reorder reads as a delete and an insert</span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="rows">
+      <div class="row eager"><span class="pos mono">1</span><span class="what">Text</span><span class="state">Changed</span></div>
+      <div class="row lifted"><span class="pos mono">2</span><span class="what">Image — was block 4</span><span class="state">Moved</span></div>
+      <div class="row held"><span class="pos mono">3</span><span class="what">Pull quote</span><span class="state">Unchanged</span></div>
+      <div class="row eager"><span class="pos mono">4</span><span class="what">Gallery</span><span class="state">Added</span></div>
+      <div class="row held"><span class="pos mono">5</span><span class="what">Text</span><span class="state">Unchanged</span></div>
+    </div>
+  </div>
+  <div class="footer"><img src="assets/icon.svg" alt=""> <b>Visorr</b> &nbsp;·&nbsp; justinholt.com/plugins/craft-visorr</div>
+</section>
+
+<!-- 5 · Selective restore ================================================ -->
+<section class="slide feature" data-n="5">
+  <div class="inner">
+    <div class="copy">
+      <div class="eyebrow"><span class="rule"></span> Restore</div>
+      <h2>Put back<br>one field</h2>
+      <p class="lede">Tick the fields you want. Everything you leave unticked stays exactly as it
+        is.</p>
+      <ul class="points">
+        <li><span class="tick"></span><span class="t">Previewed as what will be overwritten, before it writes</span></li>
+        <li><span class="tick"></span><span class="t">An ordinary save, so a restore is itself undoable</span></li>
+        <li><span class="tick"></span><span class="t">Craft&rsquo;s whole-element revert stays alongside, untouched</span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="weigh">
+      <div class="side">
+        <span class="chip">Revert</span>
+        <div class="where">The whole element</div>
+        <div class="what">Every field goes back to how it was on 12 August — including the six
+          somebody else fixed this morning.</div>
+      </div>
+      <div class="side after">
+        <span class="chip">Restore</span>
+        <div class="where">The hero heading. Only.</div>
+        <div class="what">One tick, a preview of exactly what will be overwritten, and one save.
+          The rest of the entry never moves, and the save leaves a revision of its own.</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><img src="assets/icon.svg" alt=""> <b>Visorr</b> &nbsp;·&nbsp; justinholt.com/plugins/craft-visorr</div>
+</section>
+
+<!-- 6 · Retention ======================================================== -->
+<section class="slide feature" data-n="6">
+  <div class="inner">
+    <div class="copy">
+      <div class="eyebrow"><span class="rule"></span> Retention</div>
+      <h2>Policy, not<br>one number</h2>
+      <p class="lede">Craft has one global <span class="mono">maxRevisions</span>. Visorr resolves
+        policy across three axes, most specific first.</p>
+      <ul class="points">
+        <li><span class="tick"></span><span class="t">Stored in project config, so it deploys with the site</span></li>
+        <li><span class="tick"></span><span class="t">A pin outlives every policy — Visorr&rsquo;s and Craft&rsquo;s both</span></li>
+        <li><span class="tick"></span><span class="t">Preview and deletion are one resolver, never two</span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="rows">
+      <div class="divider">Most specific wins</div>
+      <div class="row eager"><span class="pos mono">1</span><span class="what">Entry · Homepage — keep 200</span><span class="state">Match</span></div>
+      <div class="row held"><span class="pos mono">2</span><span class="what">Entry · News — keep 5, expire at 90d</span><span class="state">Skipped</span></div>
+      <div class="row held"><span class="pos mono">3</span><span class="what">Any — keep 20, expire at 365d</span><span class="state">Skipped</span></div>
+      <div class="divider">Never pruned</div>
+      <div class="row lifted"><span class="what">The revision the rebrand shipped with</span><span class="state">Pinned</span></div>
+    </div>
+  </div>
+  <div class="footer"><img src="assets/icon.svg" alt=""> <b>Visorr</b> &nbsp;·&nbsp; justinholt.com/plugins/craft-visorr</div>
+</section>
+
+<!-- 7 · The report ======================================================= -->
+<section class="slide feature" data-n="7">
+  <div class="inner">
+    <div class="copy">
+      <div class="eyebrow"><span class="rule"></span> The weight</div>
+      <h2>Where the<br>weight is</h2>
+      <p class="lede">Revision bloat is never spread evenly. It is two sections nobody thinks
+        about, one of them full of Matrix blocks.</p>
+      <ul class="points">
+        <li><span class="tick"></span><span class="t">Broken down by section, element type and element</span></li>
+        <li><span class="tick"></span><span class="t">Sizes are estimates, and are labelled as such</span></li>
+        <li><span class="tick"></span><span class="t">What is reliable is the ratio between the rows</span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="term">
+    <div class="chrome"></div>
+    <div class="body"><div><span class="prompt">$</span> <span class="cmd">php craft visorr/report</span></div><div class="head">  SECTION            ELEMENTS   REVISIONS   EST. SIZE</div><div class="out">  Case Studies            142      28,400   <span class="warn">412 MB</span></div><div class="out">  News                  1,208      19,760      104 MB</div><div class="out">  Homepage                  1       6,015   <span class="warn">88 MB</span></div><div class="out">  Landing Pages            36       1,440       11 MB</div><span class="blank"></span><div><span class="prompt">$</span> <span class="cmd">php craft visorr/prune/plan --scope=section --section=caseStudies</span></div><div class="out">  Would delete 26,982 revisions.  <span class="warn">118 pinned, kept.</span></div></div>
+  </div>
+  <div class="footer"><img src="assets/icon.svg" alt=""> <b>Visorr</b> &nbsp;·&nbsp; justinholt.com/plugins/craft-visorr</div>
+</section>
+
+<script>
+  var n = new URLSearchParams(location.search).get('s');
+  if (n) {
+    document.body.classList.add('single');
+    var el = document.querySelector('.slide[data-n="' + n + '"]');
+    if (el) el.classList.add('active');
+  }
+</script>
+</body>
+</html>

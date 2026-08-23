@@ -1,0 +1,46 @@
+<div class="visorr-stat-grid">
+    <div class="visorr-stat">
+        <div class="visorr-stat-value">{{ run.plannedCount }}</div>
+        <div class="visorr-stat-label">{{ 'Planned'|t('visorr') }}</div>
+    </div>
+    <div class="visorr-stat">
+        <div class="visorr-stat-value">{{ run.deletedCount }}</div>
+        <div class="visorr-stat-label">{{ 'Deleted'|t('visorr') }}</div>
+    </div>
+    <div class="visorr-stat">
+        <div class="visorr-stat-value">{{ run.protectedCount }}</div>
+        <div class="visorr-stat-label">{{ 'Kept — pinned'|t('visorr') }}</div>
+    </div>
+    <div class="visorr-stat">
+        <div class="visorr-stat-value">{{ storage.formatBytes(run.freedBytes) }}</div>
+        <div class="visorr-stat-label">{{ 'Reclaimed'|t('visorr') }}</div>
+    </div>
+</div>
+
+<table class="data fullwidth">
+    <tbody>
+        <tr><th scope="row">{{ 'Scope'|t('visorr') }}</th><td>{{ run.scope }}</td></tr>
+        {% if run.elementType %}<tr><th scope="row">{{ 'Element type'|t('visorr') }}</th><td>{{ run.elementType }}</td></tr>{% endif %}
+        {% if run.sectionUid %}<tr><th scope="row">{{ 'Section'|t('visorr') }}</th><td>{{ run.sectionUid }}</td></tr>{% endif %}
+        {% if run.canonicalId %}<tr><th scope="row">{{ 'Element'|t('visorr') }}</th><td><a href="{{ url('visorr/history/' ~ run.canonicalId) }}">#{{ run.canonicalId }}</a></td></tr>{% endif %}
+        <tr><th scope="row">{{ 'Trigger'|t('visorr') }}</th><td>{{ run.trigger }}</td></tr>
+        <tr><th scope="row">{{ 'Applied'|t('visorr') }}</th><td>{{ run.applied ? 'Yes'|t('visorr') : 'No — dry run'|t('visorr') }}</td></tr>
+        <tr><th scope="row">{{ 'Started'|t('visorr') }}</th><td>{{ run.dateCreated|datetime('short') }}</td></tr>
+        <tr><th scope="row">{{ 'Finished'|t('visorr') }}</th><td>{{ run.dateFinished ? run.dateFinished|datetime('short') : '—' }}</td></tr>
+    </tbody>
+</table>
+
+{% if errors is not empty %}
+    <h2>{{ 'Errors'|t('visorr') }}</h2>
+    <ul class="errors">
+        {% for error in errors %}<li>{{ error }}</li>{% endfor %}
+    </ul>
+{% endif %}
+
+<h2>{{ 'Planned revision elements'|t('visorr') }}</h2>
+
+<p class="light">
+    {{ 'The exact IDs the plan resolved, kept verbatim. {count} of them.'|t('visorr', { count: plannedIds|length }) }}
+</p>
+
+<div class="visorr-diff-body">{{ plannedIds|join(', ') ?: '—' }}</div>

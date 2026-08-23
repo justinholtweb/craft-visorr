@@ -1,0 +1,141 @@
+{% import '_includes/forms.twig' as forms %}
+
+<div class="visorr-stat-grid">
+    <div class="visorr-stat">
+        <div class="visorr-stat-value">{{ infos|length }}</div>
+        <div class="visorr-stat-label">{{ 'Revisions'|t('visorr') }}</div>
+    </div>
+    <div class="visorr-stat">
+        <div class="visorr-stat-value">{{ craft.app.formatter.asShortSize(totalBytes, 1) }}</div>
+        <div class="visorr-stat-label">{{ 'Estimated storage'|t('visorr') }}</div>
+    </div>
+    <div class="visorr-stat">
+        <div class="visorr-stat-value">{{ retention.maxRevisions ?? '∞' }}</div>
+        <div class="visorr-stat-label">{{ 'Kept by policy'|t('visorr') }}</div>
+    </div>
+</div>
+
+<p class="light">
+    {{ 'Retention: {description}'|t('visorr', { description: retention.description }) }}
+</p>
+
+{% if siteFiltered %}
+    <div class="notice">
+        {{ 'This element is shared across sites, so you are seeing only the revisions authored from this site.'|t('visorr') }}
+        {% if siteCounts is not empty %}
+            <ul>
+                {% for siteId, count in siteCounts %}
+                    <li>
+                        {% if siteId == 0 %}
+                            {{ '{count} with no recorded site (from before Visorr was installed)'|t('visorr', { count: count }) }}
+                        {% else %}
+                            {{ '{site}: {count}'|t('visorr', {
+                                site: craft.app.sites.getSiteById(siteId) ? craft.app.sites.getSiteById(siteId).name : siteId,
+                                count: count,
+                            }) }}
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+{% endif %}
+
+{% if infos is empty %}
+    <p class="visorr-empty">{{ 'No revisions.'|t('visorr') }}</p>
+{% else %}
+    <div class="tablepane">
+        <table class="data fullwidth" id="visorr-history">
+            <thead>
+                <tr>
+                    {% if canPrune %}<th scope="col" class="thin"></th>{% endif %}
+                    <th scope="col">{{ 'Revision'|t('visorr') }}</th>
+                    <th scope="col">{{ 'Created'|t('visorr') }}</th>
+                    <th scope="col">{{ 'By'|t('visorr') }}</th>
+                    <th scope="col">{{ 'Notes'|t('visorr') }}</th>
+                    <th scope="col">{{ 'Blocks'|t('visorr') }}</th>
+                    <th scope="col">{{ 'Size'|t('visorr') }}</th>
+                    <th scope="col" class="thin"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for info in infos %}
+                    <tr data-visorr-revision{{ info.pinned ? ' class="visorr-is-pinned"' : '' }}>
+                        {% if canPrune %}
+                            <td>
+                                <input type="checkbox"
+                                       class="checkbox"
+                                       id="visorr-rev-{{ info.revisionId }}"
+                                       value="{{ info.revisionId }}"
+                                       data-visorr-revision-checkbox
+                                       {{ info.pinned ? 'disabled' : '' }}>
+                                <label for="visorr-rev-{{ info.revisionId }}" class="visually-hidden">
+                                    {{ 'Select revision {num}'|t('visorr', { num: info.num }) }}
+                                </label>
+                            </td>
+                        {% endif %}
+                        <th scope="row">
+                            <a href="{{ url('visorr/compare/' ~ element.id, { left: info.revisionId, right: 0 }) }}">
+                                {{ info.label() }}
+                            </a>
+                            {% if info.isCurrent %}
+                                <span class="visorr-badge visorr-badge--current">{{ 'current'|t('visorr') }}</span>
+                            {% endif %}
+                            {% if info.pinned %}
+                                <span class="visorr-badge visorr-badge--pinned">{{ info.pinLabel ?: 'pinned'|t('visorr') }}</span>
+                            {% endif %}
+                        </th>
+                        <td>{{ info.dateCreated ? info.dateCreated|datetime('short') : '—' }}</td>
+                        <td>{{ info.creatorName ?: '—' }}</td>
+                        <td>{{ info.notes ?: '—' }}</td>
+                        <td>{{ info.nestedCount ?: '—' }}</td>
+                        <td>{{ craft.app.formatter.asShortSize(info.sizeBytes, 1) }}</td>
+                        <td>
+                            {% if canPin %}
+                                <button type="button"
+                                        class="visorr-pin"
+                                        data-visorr-pin="{{ info.revisionId }}"
+                                        aria-pressed="{{ info.pinned ? 'true' : 'false' }}"
+                                        title="{{ info.pinned ? 'Unpin'|t('visorr') : 'Pin this revision'|t('visorr') }}">📌</button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if canPrune %}
+        <div class="visorr-restore-bar">
+            <button type="button" class="btn" id="visorr-delete-selected">{{ 'Delete selected'|t('visorr') }}</button>
+            <span class="light">{{ 'Pinned revisions cannot be selected.'|t('visorr') }}</span>
+        </div>
+
+        {% js %}
+            document.getElementById('visorr-delete-selected').addEventListener('click', function () {
+                var ids = Array.prototype.slice
+                    .call(document.querySelectorAll('[data-visorr-revision-checkbox]:checked'))
+                    .map(function (box) { return box.value; });
+
+                if (!ids.length) {
+                    Craft.cp.displayError(Craft.t('visorr', 'Select at least one revision.'));
+                    return;
+                }
+
+                Craft.sendActionRequest('POST', 'visorr/history/delete-revisions', {
+                    data: { elementId: {{ element.id }}, revisionIds: ids },
+                })
+                    .then(function (response) {
+                        Craft.cp.displayNotice(response.data.message);
+                        window.location.reload();
+                    })
+                    .catch(function (error) {
+                        Craft.cp.displayError(
+                            (error && error.response && error.response.data && error.response.data.message) ||
+                                Craft.t('visorr', 'Could not delete those revisions.')
+                        );
+                    });
+            });
+        {% endjs %}
+    {% endif %}
+{% endif %}

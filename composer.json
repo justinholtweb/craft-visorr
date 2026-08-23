@@ -1,0 +1,75 @@
+{
+    "name": "justinholtweb/craft-visorr",
+    "description": "See what changed between any two revisions, restore just the fields you want, and keep revision history from eating the database.",
+    "type": "craft-plugin",
+    "version": "5.0.0",
+    "keywords": [
+        "craft",
+        "cms",
+        "craftcms",
+        "craft-plugin",
+        "visorr",
+        "revisions",
+        "revision history",
+        "diff",
+        "compare",
+        "restore",
+        "retention",
+        "pruning",
+        "multi-site"
+    ],
+    "license": "proprietary",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "authors": [
+        {
+            "name": "Justin Holt",
+            "homepage": "https://justinholt.com"
+        }
+    ],
+    "support": {
+        "email": "justin@justinholt.com",
+        "docs": "https://justinholt.com/plugins/craft-visorr/docs",
+        "source": "https://github.com/justinholtweb/craft-visorr",
+        "issues": "https://github.com/justinholtweb/craft-visorr/issues"
+    },
+    "require": {
+        "php": "^8.2",
+        "ext-json": "*",
+        "craftcms/cms": "^5.3.0"
+    },
+    "require-dev": {
+        "craftcms/ecs": "dev-main",
+        "craftcms/phpstan": "dev-main",
+        "phpunit/phpunit": "^10.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "justinholtweb\\visorr\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "justinholtweb\\visorr\\tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit"
+    },
+    "config": {
+        "allow-plugins": {
+            "yiisoft/yii2-composer": true,
+            "craftcms/plugin-installer": true,
+            "craftcms/generator": true
+        }
+    },
+    "extra": {
+        "name": "Visorr",
+        "handle": "visorr",
+        "developer": "Justin Holt",
+        "developerUrl": "https://justinholt.com",
+        "documentationUrl": "https://justinholt.com/plugins/craft-visorr/docs",
+        "changelogUrl": "https://raw.githubusercontent.com/justinholtweb/craft-visorr/main/CHANGELOG.md",
+        "class": "justinholtweb\\visorr\\Plugin"
+    }
+}

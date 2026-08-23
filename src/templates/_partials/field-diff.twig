@@ -1,0 +1,67 @@
+{# One field's comparison.
+
+   `diff` is a FieldDiff. Nested fields recurse into _partials/block-diff.twig, which comes
+   straight back here for each block's own fields — the two templates are mutually recursive,
+   which is what lets a Matrix inside a Matrix render without a third template. #}
+
+{% set restorable = restorable ?? false %}
+{% set showUnchanged = showUnchanged ?? true %}
+
+{% if diff.changed or showUnchanged %}
+    <section class="visorr-field-diff{{ diff.changed ? '' : ' visorr-unchanged' }}">
+        <header>
+            {% if restorable and diff.changed and diff.restorable %}
+                <input type="checkbox"
+                       class="checkbox"
+                       id="visorr-restore-{{ diff.handle }}"
+                       value="{{ diff.handle }}"
+                       data-visorr-restore-field>
+                <label for="visorr-restore-{{ diff.handle }}" class="visually-hidden">
+                    {{ 'Restore {field}'|t('visorr', { field: diff.label }) }}
+                </label>
+            {% endif %}
+
+            <h3>{{ diff.label }}</h3>
+            <span class="visorr-handle">{{ diff.handle }}</span>
+
+            <span class="visorr-spacer"></span>
+
+            {% if diff.changed %}
+                <span class="visorr-badge">{{ diff.summary() }}</span>
+            {% else %}
+                <span class="visorr-badge">{{ 'unchanged'|t('visorr') }}</span>
+            {% endif %}
+
+            {% if diff.restoreBlocker is not null %}
+                <span class="visorr-badge" title="{{ diff.restoreBlocker }}">{{ 'not restorable'|t('visorr') }}</span>
+            {% endif %}
+        </header>
+
+        {% if diff.kind == 'nested' %}
+            {% for nestedBlock in diff.blocks %}
+                {% include 'visorr/_partials/block-diff' with {
+                    blockDiff: nestedBlock,
+                    showUnchanged: showUnchanged,
+                } only %}
+            {% endfor %}
+
+            {% if diff.blocks is empty %}
+                <div class="visorr-diff-body light">{{ 'No blocks on either side.'|t('visorr') }}</div>
+            {% endif %}
+
+        {% elseif not diff.changed %}
+            <div class="visorr-diff-body light">{{ diff.newText|slice(0, 400) ?: '—' }}</div>
+
+        {% elseif diff.diffHtml is not null %}
+            <div class="visorr-diff-body">{{ diff.diffHtml|raw }}</div>
+
+        {% else %}
+            {# No inline diff: the values were too large to word-diff, so show them side by
+               side instead of pretending we worked out which words moved. #}
+            <div class="visorr-side-by-side">
+                <div>{{ diff.oldText ?: '—' }}</div>
+                <div>{{ diff.newText ?: '—' }}</div>
+            </div>
+        {% endif %}
+    </section>
+{% endif %}

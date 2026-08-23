@@ -1,0 +1,51 @@
+<p class="light">
+    {{ 'A pinned revision is never removed by pruning — not by Visorr’s, and not by Craft’s own. This is the list of everything being kept on purpose.'|t('visorr') }}
+</p>
+
+{% if rows is empty %}
+    <p class="visorr-empty">{{ 'Nothing is pinned yet.'|t('visorr') }}</p>
+{% else %}
+    <div class="tablepane">
+        <table class="data fullwidth">
+            <thead>
+                <tr>
+                    <th scope="col">{{ 'Element'|t('visorr') }}</th>
+                    <th scope="col">{{ 'Revision'|t('visorr') }}</th>
+                    <th scope="col">{{ 'Label'|t('visorr') }}</th>
+                    <th scope="col">{{ 'Pinned'|t('visorr') }}</th>
+                    <th scope="col" class="thin"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in rows %}
+                    {% set title = titles[row.canonicalId] ?? null %}
+                    <tr data-visorr-revision class="visorr-is-pinned">
+                        <th scope="row">
+                            {% if title and title.url %}
+                                <a href="{{ title.url }}">{{ title.label }}</a>
+                            {% else %}
+                                {{ title ? title.label : '#' ~ row.canonicalId }}
+                            {% endif %}
+                        </th>
+                        <td>
+                            <a href="{{ url('visorr/compare/' ~ row.canonicalId, { left: row.revisionId, right: 0 }) }}">
+                                {{ 'Revision {num}'|t('visorr', { num: row.num }) }}
+                            </a>
+                        </td>
+                        <td>{{ row.label ?: '—' }}</td>
+                        <td>{{ row.datePinned ? row.datePinned|datetime('short') : '—' }}</td>
+                        <td>
+                            {% if canPin %}
+                                <button type="button"
+                                        class="visorr-pin"
+                                        data-visorr-pin="{{ row.revisionId }}"
+                                        aria-pressed="true"
+                                        title="{{ 'Unpin'|t('visorr') }}">📌</button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endif %}
